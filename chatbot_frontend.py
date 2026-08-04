@@ -3,9 +3,18 @@ from chatbot_backend import workflow
 from langchain_core.messages import HumanMessage
 import uuid
 
+# ========== Utility Func ===========
+
 def generate_thread_id():
     thread_id = uuid.uuid4()
     return thread_id
+
+def reset_state():
+    thread_id=generate_thread_id()
+    st.session_state["thread_id"]=thread_id
+    st.session_state["message_history"]=[]
+
+# ========== State Var ===========
 
 if "message_history" not in st.session_state:
     st.session_state["message_history"]=[]
@@ -13,8 +22,12 @@ if "message_history" not in st.session_state:
 if "thread_id" not in st.session_state:
     st.session_state["thread_id"] = generate_thread_id()
     
+if "threads" not in st.session_state:
+    st.session_state
+    
 st.sidebar.title("AI-Chat")
-st.sidebar.button("New Chat")
+if st.sidebar.button("New Chat"):
+    reset_state()
 
 for msg in st.session_state["message_history"]:
     with st.chat_message(msg["role"]):
