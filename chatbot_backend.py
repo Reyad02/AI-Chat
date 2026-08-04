@@ -2,7 +2,7 @@ from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.sqlite import SqliteSaver
 import sqlite3
@@ -32,3 +32,7 @@ graph.add_edge("chat_node", END)
 checkpointer = SqliteSaver(conn=conn)
 
 workflow = graph.compile(checkpointer=checkpointer)
+
+# response = workflow.invoke({"messages": [HumanMessage(content="How are you?")]}, {"configurable": {"thread_id": "thread-1"}})
+
+# print(response["messages"][-1].content)
