@@ -33,6 +33,14 @@ checkpointer = SqliteSaver(conn=conn)
 
 workflow = graph.compile(checkpointer=checkpointer)
 
+def get_thread_ids():
+    all_threads = set()
+    
+    for checkpoint in checkpointer.list(None):
+        all_threads.add(checkpoint.config["configurable"]["thread_id"])
+    
+    return all_threads
+
 # response = workflow.invoke({"messages": [HumanMessage(content="How are you?")]}, {"configurable": {"thread_id": "thread-1"}})
 
 # print(response["messages"][-1].content)
