@@ -1,6 +1,6 @@
 import streamlit as st
 from chatbot_backend import workflow, get_thread_ids
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 import uuid
 
 # ========== Utility Func ===========
@@ -66,6 +66,7 @@ if user_msg:
         st.text(user_msg)
     
     with st.chat_message("assistant"):
+        status_holder = {"box": None}
         
 # ========== Generator Function for streaming ==========        
         def response_streaming():
@@ -77,10 +78,28 @@ if user_msg:
                 if chunk["type"]=="messages":
                     token, metadata = chunk["data"]
                     
-                    if token.content:
+                    if isinstance(token, ToolMessage):
+                        tool_name = getattr(token, "name", "tool")
+                        if status_holder["box"] is None:
+                            status_holder["box"] = st.status(
+                                label=f"Using {tool_name} ...", expanded=True
+                            )
+                        else:
+                            status_holder["box"].update(
+                                label=f"Using {tool_name}",
+                                state="running",
+                                expanded=True
+                            )
+                    
+                    if token.content and isinstance(token, AIMessage):
                         yield token.content
             
         response = st.write_stream(response_streaming())
+        
+        if status_holder["box"] is not None:
+            status_holder["box"].update(
+                label="Tool Finished", state="complete", expanded=False
+            )
     st.session_state["message_history"].append({"role": "assistant", "content": response})  
     
     
